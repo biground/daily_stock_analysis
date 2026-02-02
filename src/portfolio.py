@@ -112,6 +112,96 @@ class Position:
 
 
 @dataclass
+class TradeRecord:
+    """
+    交易记录
+    """
+    trade_id: str = ""                     # 交易ID
+    date: str = ""                         # 交易日期
+    time: str = ""                         # 交易时间
+    code: str = ""                         # 股票代码
+    name: str = ""                         # 股票名称
+    action: str = ""                       # 操作类型：buy/sell/add/reduce
+    shares: int = 0                        # 交易股数
+    price: float = 0.0                     # 成交价格
+    amount: float = 0.0                    # 成交金额
+    commission: float = 0.0                # 佣金
+    stamp_duty: float = 0.0                # 印花税（卖出时）
+    total_cost: float = 0.0                # 总费用（含税费）
+    reason: str = ""                       # 交易理由
+    notes: str = ""                        # 备注
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "trade_id": self.trade_id,
+            "date": self.date,
+            "time": self.time,
+            "code": self.code,
+            "name": self.name,
+            "action": self.action,
+            "shares": self.shares,
+            "price": self.price,
+            "amount": self.amount,
+            "commission": self.commission,
+            "stamp_duty": self.stamp_duty,
+            "total_cost": self.total_cost,
+            "reason": self.reason,
+            "notes": self.notes,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'TradeRecord':
+        return cls(**{k: data.get(k, v) for k, v in cls.__dataclass_fields__.items() 
+                      if k in data or hasattr(cls, k)})
+
+
+@dataclass
+class DailySnapshot:
+    """
+    每日账户快照（用于追踪每日收益）
+    """
+    date: str = ""                         # 日期
+    total_assets: float = 0.0              # 总资产
+    available_cash: float = 0.0            # 可用现金
+    total_market_value: float = 0.0        # 持仓市值
+    total_profit_loss: float = 0.0         # 总盈亏
+    daily_profit_loss: float = 0.0         # 当日盈亏
+    daily_return_pct: float = 0.0          # 当日收益率
+    total_return_pct: float = 0.0          # 累计收益率
+    position_count: int = 0                # 持仓数量
+    positions_snapshot: Dict[str, Dict] = field(default_factory=dict)  # 持仓快照
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "date": self.date,
+            "total_assets": self.total_assets,
+            "available_cash": self.available_cash,
+            "total_market_value": self.total_market_value,
+            "total_profit_loss": self.total_profit_loss,
+            "daily_profit_loss": self.daily_profit_loss,
+            "daily_return_pct": self.daily_return_pct,
+            "total_return_pct": self.total_return_pct,
+            "position_count": self.position_count,
+            "positions_snapshot": self.positions_snapshot,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'DailySnapshot':
+        return cls(
+            date=data.get("date", ""),
+            total_assets=data.get("total_assets", 0.0),
+            available_cash=data.get("available_cash", 0.0),
+            total_market_value=data.get("total_market_value", 0.0),
+            total_profit_loss=data.get("total_profit_loss", 0.0),
+            daily_profit_loss=data.get("daily_profit_loss", 0.0),
+            daily_return_pct=data.get("daily_return_pct", 0.0),
+            total_return_pct=data.get("total_return_pct", 0.0),
+            position_count=data.get("position_count", 0),
+            positions_snapshot=data.get("positions_snapshot", {}),
+        )
+
+
+@dataclass
 class PortfolioConfig:
     """
     模拟盘配置
@@ -562,6 +652,321 @@ class PortfolioManager:
             })
         
         return alerts
+    
+    # ============================================================
+    # 交易记录管理
+    # ============================================================
+    
+    def _get_trades_path(self) -> Path:
+        """获取交易记录文件路径"""
+        return self.config_path.parent / "trades.json"
+    
+    def _get_snapshots_path(self) -> Path:
+        """获取每日快照文件路径"""
+        return self.config_path.parent / "daily_snapshots.json"
+    
+    def load_trades(self) -> List[TradeRecord]:
+        """加载交易记录"""
+        trades_path = self._get_trades_path()
+        if trades_path.exists():
+            try:
+                with open(trades_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                return [TradeRecord.from_dict(t) for t in data.get("trades", [])]
+            except Exception as e:
+                logger.error(f"加载交易记录失败: {e}")
+        return []
+    
+    def save_trades(self, trades: List[TradeRecord]) -> bool:
+        """保存交易记录"""
+        try:
+            trades_path = self._get_trades_path()
+            trades_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(trades_path, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "trades": [t.to_dict() for t in trades],
+                    "updated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                }, f, ensure_ascii=False, indent=2)
+            
+            logger.info(f"交易记录已保存: {trades_path}")
+            return True
+        except Exception as e:
+            logger.error(f"保存交易记录失败: {e}")
+            return False
+    
+    def record_trade(
+        self,
+        code: str,
+        name: str,
+        action: str,
+        shares: int,
+        price: float,
+        reason: str = "",
+        notes: str = ""
+    ) -> TradeRecord:
+        """
+        记录一笔交易
+        
+        Args:
+            code: 股票代码
+            name: 股票名称
+            action: 操作类型 (buy/sell/add/reduce)
+            shares: 交易股数
+            price: 成交价格
+            reason: 交易理由
+            notes: 备注
+            
+        Returns:
+            交易记录对象
+        """
+        now = datetime.now()
+        p = self.portfolio
+        
+        # 计算交易费用
+        amount = shares * price
+        commission = max(amount * p.commission_rate, p.min_commission)
+        stamp_duty = amount * p.stamp_duty_rate if action in ['sell', 'reduce'] else 0
+        total_cost = amount + commission + stamp_duty
+        
+        # 创建交易记录
+        trade = TradeRecord(
+            trade_id=f"{now.strftime('%Y%m%d%H%M%S')}_{code}",
+            date=now.strftime('%Y-%m-%d'),
+            time=now.strftime('%H:%M:%S'),
+            code=code,
+            name=name,
+            action=action,
+            shares=shares,
+            price=price,
+            amount=amount,
+            commission=commission,
+            stamp_duty=stamp_duty,
+            total_cost=total_cost,
+            reason=reason,
+            notes=notes,
+        )
+        
+        # 保存交易记录
+        trades = self.load_trades()
+        trades.append(trade)
+        self.save_trades(trades)
+        
+        # 更新持仓
+        if action in ['buy', 'add']:
+            self.add_position(code, name, shares, price, notes)
+            self.portfolio.available_cash -= total_cost
+        elif action in ['sell', 'reduce']:
+            self.reduce_position(code, shares)
+            self.portfolio.available_cash += (amount - commission - stamp_duty)
+        
+        self.save_config()
+        
+        logger.info(f"交易记录: {action} {name}({code}) {shares}股 @ ¥{price:.3f}")
+        return trade
+    
+    def reduce_position(self, code: str, shares: int) -> bool:
+        """
+        减少持仓
+        
+        Args:
+            code: 股票代码
+            shares: 减少的股数
+        """
+        if code not in self.portfolio.positions:
+            logger.warning(f"持仓不存在: {code}")
+            return False
+        
+        pos = self.portfolio.positions[code]
+        if shares >= pos.shares:
+            # 清仓
+            del self.portfolio.positions[code]
+            logger.info(f"已清仓: {pos.name}({code})")
+        else:
+            pos.shares -= shares
+            pos.last_update = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            logger.info(f"已减仓: {pos.name}({code}) -{shares}股")
+        
+        return True
+    
+    def get_today_trades(self) -> List[TradeRecord]:
+        """获取今日交易记录"""
+        today = datetime.now().strftime('%Y-%m-%d')
+        trades = self.load_trades()
+        return [t for t in trades if t.date == today]
+    
+    def get_trades_by_date(self, date: str) -> List[TradeRecord]:
+        """获取指定日期的交易记录"""
+        trades = self.load_trades()
+        return [t for t in trades if t.date == date]
+    
+    def get_trades_by_code(self, code: str) -> List[TradeRecord]:
+        """获取指定股票的交易记录"""
+        trades = self.load_trades()
+        return [t for t in trades if t.code == code]
+    
+    # ============================================================
+    # 每日快照管理
+    # ============================================================
+    
+    def load_snapshots(self) -> Dict[str, DailySnapshot]:
+        """加载每日快照"""
+        snapshots_path = self._get_snapshots_path()
+        if snapshots_path.exists():
+            try:
+                with open(snapshots_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                return {date: DailySnapshot.from_dict(snap) 
+                        for date, snap in data.get("snapshots", {}).items()}
+            except Exception as e:
+                logger.error(f"加载每日快照失败: {e}")
+        return {}
+    
+    def save_snapshots(self, snapshots: Dict[str, DailySnapshot]) -> bool:
+        """保存每日快照"""
+        try:
+            snapshots_path = self._get_snapshots_path()
+            snapshots_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(snapshots_path, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "snapshots": {date: snap.to_dict() for date, snap in snapshots.items()},
+                    "updated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                }, f, ensure_ascii=False, indent=2)
+            
+            logger.info(f"每日快照已保存: {snapshots_path}")
+            return True
+        except Exception as e:
+            logger.error(f"保存每日快照失败: {e}")
+            return False
+    
+    def take_daily_snapshot(self) -> DailySnapshot:
+        """
+        记录今日账户快照
+        
+        Returns:
+            今日快照对象
+        """
+        today = datetime.now().strftime('%Y-%m-%d')
+        p = self.portfolio
+        
+        # 加载历史快照
+        snapshots = self.load_snapshots()
+        
+        # 计算当日盈亏
+        yesterday_assets = p.initial_capital  # 默认使用初始资金
+        if snapshots:
+            # 获取最近一天的快照
+            sorted_dates = sorted(snapshots.keys(), reverse=True)
+            for date in sorted_dates:
+                if date < today:
+                    yesterday_assets = snapshots[date].total_assets
+                    break
+        
+        daily_profit_loss = p.total_assets - yesterday_assets
+        daily_return_pct = (daily_profit_loss / yesterday_assets * 100) if yesterday_assets > 0 else 0
+        
+        # 创建今日快照
+        snapshot = DailySnapshot(
+            date=today,
+            total_assets=p.total_assets,
+            available_cash=p.available_cash,
+            total_market_value=p.total_market_value,
+            total_profit_loss=p.total_profit_loss,
+            daily_profit_loss=daily_profit_loss,
+            daily_return_pct=daily_return_pct,
+            total_return_pct=p.total_return_pct,
+            position_count=len(p.positions),
+            positions_snapshot={code: pos.to_dict() for code, pos in p.positions.items()},
+        )
+        
+        # 保存快照
+        snapshots[today] = snapshot
+        self.save_snapshots(snapshots)
+        
+        logger.info(f"今日快照已记录: 总资产 ¥{p.total_assets:.2f}, 当日盈亏 ¥{daily_profit_loss:.2f}")
+        return snapshot
+    
+    def get_snapshot(self, date: str) -> Optional[DailySnapshot]:
+        """获取指定日期的快照"""
+        snapshots = self.load_snapshots()
+        return snapshots.get(date)
+    
+    def get_recent_snapshots(self, days: int = 7) -> List[DailySnapshot]:
+        """获取最近N天的快照"""
+        snapshots = self.load_snapshots()
+        sorted_dates = sorted(snapshots.keys(), reverse=True)[:days]
+        return [snapshots[date] for date in sorted_dates]
+    
+    def generate_performance_report(self, days: int = 7) -> str:
+        """
+        生成收益报告
+        
+        Args:
+            days: 统计天数
+            
+        Returns:
+            Markdown 格式的收益报告
+        """
+        snapshots = self.get_recent_snapshots(days)
+        trades = self.load_trades()
+        
+        lines = [
+            "## 📊 收益报告",
+            "",
+            f"统计周期：最近 {days} 天",
+            "",
+        ]
+        
+        if snapshots:
+            latest = snapshots[0]
+            lines.extend([
+                "### 💰 账户概览",
+                "",
+                f"- 总资产：**¥{latest.total_assets:,.2f}**",
+                f"- 累计收益率：**{latest.total_return_pct:+.2f}%**",
+                f"- 今日盈亏：**¥{latest.daily_profit_loss:+,.2f}** ({latest.daily_return_pct:+.2f}%)",
+                "",
+                "### 📈 每日收益",
+                "",
+                "| 日期 | 总资产 | 当日盈亏 | 收益率 |",
+                "|------|--------|----------|--------|",
+            ])
+            
+            for snap in snapshots:
+                emoji = "🟢" if snap.daily_profit_loss >= 0 else "🔴"
+                lines.append(
+                    f"| {snap.date} | ¥{snap.total_assets:,.2f} | "
+                    f"{emoji} ¥{snap.daily_profit_loss:+,.2f} | {snap.daily_return_pct:+.2f}% |"
+                )
+            
+            lines.append("")
+        else:
+            lines.extend([
+                "*暂无历史快照数据*",
+                "",
+            ])
+        
+        # 最近交易记录
+        recent_trades = [t for t in trades if t.date >= snapshots[-1].date] if snapshots else trades[-10:]
+        if recent_trades:
+            lines.extend([
+                "### 📝 最近交易",
+                "",
+                "| 日期 | 操作 | 股票 | 数量 | 价格 | 金额 |",
+                "|------|------|------|------|------|------|",
+            ])
+            
+            for t in recent_trades[-10:]:
+                action_emoji = "🟢" if t.action in ['buy', 'add'] else "🔴"
+                action_text = {'buy': '买入', 'sell': '卖出', 'add': '加仓', 'reduce': '减仓'}.get(t.action, t.action)
+                lines.append(
+                    f"| {t.date} | {action_emoji} {action_text} | {t.name} | {t.shares} | ¥{t.price:.3f} | ¥{t.amount:,.2f} |"
+                )
+            
+            lines.append("")
+        
+        return "\n".join(lines)
 
 
 # ============================================================

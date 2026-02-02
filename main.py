@@ -295,6 +295,10 @@ def run_full_analysis(
                     logger.info("正在生成 AI 操作建议...")
                     operation_advice = advisor.generate_operation_advice(results, use_ai=True)
                     logger.info("操作建议生成完成")
+                
+                # 记录今日快照（用于追踪每日收益）
+                snapshot = portfolio_manager.take_daily_snapshot()
+                logger.info(f"今日快照: 总资产 ¥{snapshot.total_assets:.2f}, 当日盈亏 ¥{snapshot.daily_profit_loss:+.2f}")
                     
             except Exception as e:
                 logger.error(f"模拟盘处理失败: {e}")

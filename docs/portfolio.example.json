@@ -1,0 +1,35 @@
+{
+  "initial_capital": 100000.0,
+  "available_cash": 50000.0,
+  "max_single_position_pct": 30.0,
+  "stop_loss_pct": 8.0,
+  "take_profit_pct": 20.0,
+  "max_total_position_pct": 80.0,
+  "commission_rate": 0.0003,
+  "stamp_duty_rate": 0.001,
+  "min_commission": 5.0,
+  "positions": {
+    "600519": {
+      "code": "600519",
+      "name": "贵州茅台",
+      "shares": 100,
+      "cost_price": 1800.0,
+      "current_price": 1850.0,
+      "buy_date": "2026-01-15",
+      "last_update": "2026-02-02 22:00:00",
+      "notes": "白酒龙头，长期持有"
+    },
+    "300750": {
+      "code": "300750",
+      "name": "宁德时代",
+      "shares": 200,
+      "cost_price": 180.0,
+      "current_price": 175.0,
+      "buy_date": "2026-01-20",
+      "last_update": "2026-02-02 22:00:00",
+      "notes": "新能源龙头"
+    }
+  },
+  "created_at": "2026-01-01 00:00:00",
+  "updated_at": "2026-02-02 22:00:00"
+}

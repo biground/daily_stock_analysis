@@ -584,6 +584,36 @@ class GeminiAnalyzer:
         """检查分析器是否可用"""
         return self._model is not None or self._openai_client is not None
     
+    def generate_content(self, prompt: str, temperature: float = 0.7) -> Optional[str]:
+        """
+        通用内容生成接口（供外部模块调用）
+        
+        用于生成操作建议、市场分析等非股票分析的内容。
+        
+        Args:
+            prompt: 提示词
+            temperature: 温度参数（默认0.7）
+            
+        Returns:
+            生成的文本内容，失败返回 None
+        """
+        if not self.is_available():
+            logger.warning("AI 分析器不可用，无法生成内容")
+            return None
+        
+        try:
+            generation_config = {
+                "temperature": temperature,
+                "max_output_tokens": 4096,
+            }
+            
+            response_text = self._call_api_with_retry(prompt, generation_config)
+            return response_text
+            
+        except Exception as e:
+            logger.error(f"生成内容失败: {e}")
+            return None
+    
     def _call_openai_api(self, prompt: str, generation_config: dict) -> str:
         """
         调用 OpenAI 兼容 API

@@ -98,6 +98,15 @@ class Config:
     # 报告类型：simple(精简) 或 full(完整)
     report_type: str = "simple"
 
+    # === 本地报告保存配置 ===
+    save_local_report: bool = True              # 是否保存本地 MD 报告
+    reports_dir: str = "./reports"              # 报告保存目录
+    
+    # === 模拟盘配置 ===
+    portfolio_enabled: bool = True              # 是否启用模拟盘功能
+    portfolio_config_path: str = "./data/portfolio.json"  # 仓位配置文件路径
+    generate_operation_advice: bool = True      # 是否生成 AI 操作建议
+
     # PushPlus 推送配置
     pushplus_token: Optional[str] = None  # PushPlus Token
 
@@ -368,7 +377,14 @@ class Config:
             # - efinance/akshare_em: 全量拉取，数据丰富但负载大
             realtime_source_priority=os.getenv('REALTIME_SOURCE_PRIORITY', 'akshare_sina,tencent,efinance,akshare_em'),
             realtime_cache_ttl=int(os.getenv('REALTIME_CACHE_TTL', '600')),
-            circuit_breaker_cooldown=int(os.getenv('CIRCUIT_BREAKER_COOLDOWN', '300'))
+            circuit_breaker_cooldown=int(os.getenv('CIRCUIT_BREAKER_COOLDOWN', '300')),
+            # 本地报告保存配置
+            save_local_report=os.getenv('SAVE_LOCAL_REPORT', 'true').lower() == 'true',
+            reports_dir=os.getenv('REPORTS_DIR', './reports'),
+            # 模拟盘配置
+            portfolio_enabled=os.getenv('PORTFOLIO_ENABLED', 'true').lower() == 'true',
+            portfolio_config_path=os.getenv('PORTFOLIO_CONFIG_PATH', './data/portfolio.json'),
+            generate_operation_advice=os.getenv('GENERATE_OPERATION_ADVICE', 'true').lower() == 'true',
         )
     
     @classmethod

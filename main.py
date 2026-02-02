@@ -46,6 +46,9 @@ from src.core.pipeline import StockAnalysisPipeline
 from src.core.market_review import run_market_review
 from src.search_service import SearchService
 from src.analyzer import GeminiAnalyzer
+from src.portfolio import get_portfolio_manager, DISCLAIMER
+from src.report_saver import get_report_saver, save_analysis_report
+from src.operation_advisor import OperationAdvisor, generate_daily_operation_advice
 
 # 配置日志格式
 LOG_FORMAT = '%(asctime)s | %(levelname)-8s | %(name)-20s | %(message)s'
@@ -263,6 +266,51 @@ def run_full_analysis(
                 )
         
         logger.info("\n任务执行完成")
+
+        # === 新增：模拟盘操作建议 + 本地报告保存 ===
+        operation_advice = ""
+        
+        # 1. 更新持仓价格并生成操作建议
+        if config.portfolio_enabled and results:
+            try:
+                portfolio_manager = get_portfolio_manager(config.portfolio_config_path)
+                
+                # 更新持仓股票的当前价格
+                prices = {}
+                for r in results:
+                    # 从分析结果中提取当前价格（如果有）
+                    if hasattr(r, 'dashboard') and r.dashboard:
+                        sniper = r.dashboard.get('battle_plan', {}).get('sniper_points', {})
+                        if sniper and '现价' in str(sniper):
+                            # 尝试从狙击点位提取现价
+                            pass
+                portfolio_manager.update_prices(prices)
+                
+                # 输出持仓摘要
+                advisor = OperationAdvisor(analyzer=pipeline.analyzer)
+                logger.info(advisor.get_quick_summary(results))
+                
+                # 生成 AI 操作建议
+                if config.generate_operation_advice:
+                    logger.info("正在生成 AI 操作建议...")
+                    operation_advice = advisor.generate_operation_advice(results, use_ai=True)
+                    logger.info("操作建议生成完成")
+                    
+            except Exception as e:
+                logger.error(f"模拟盘处理失败: {e}")
+        
+        # 2. 保存本地 MD 报告
+        if config.save_local_report and results:
+            try:
+                report_saver = get_report_saver(config.reports_dir)
+                report_path = report_saver.save_daily_summary(
+                    results=results,
+                    market_report=market_report,
+                    operation_advice=operation_advice
+                )
+                logger.info(f"本地报告已保存: {report_path}")
+            except Exception as e:
+                logger.error(f"保存本地报告失败: {e}")
 
         # === 新增：生成飞书云文档 ===
         try:

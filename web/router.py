@@ -284,6 +284,11 @@ def create_default_router() -> Router:
     page_handler = get_page_handler()
     api_handler = get_api_handler()
     
+    # 模拟盘处理器
+    from web.portfolio_api import get_portfolio_api
+    from web.portfolio_templates import render_portfolio_dashboard, render_trades_page, render_accuracy_page
+    portfolio_api = get_portfolio_api()
+    
     # === 页面路由 ===
     router.register(
         "/", "GET",
@@ -320,6 +325,43 @@ def create_default_router() -> Router:
         "/task", "GET",
         lambda q: api_handler.handle_task_status(q),
         "查询任务状态"
+    )
+    
+    # === 模拟盘路由 ===
+    router.register(
+        "/portfolio", "GET",
+        lambda q: HtmlResponse(render_portfolio_dashboard(portfolio_api.get_dashboard_data()).encode('utf-8')),
+        "模拟盘仪表盘"
+    )
+    
+    router.register(
+        "/portfolio/trades", "GET",
+        lambda q: HtmlResponse(render_trades_page(portfolio_api.get_trade_history()).encode('utf-8')),
+        "交易记录"
+    )
+    
+    router.register(
+        "/portfolio/accuracy", "GET",
+        lambda q: HtmlResponse(render_accuracy_page(portfolio_api.get_ai_accuracy()).encode('utf-8')),
+        "AI准确度分析"
+    )
+    
+    router.register(
+        "/api/portfolio/dashboard", "GET",
+        lambda q: JsonResponse(portfolio_api.get_dashboard_data()),
+        "模拟盘仪表盘API"
+    )
+    
+    router.register(
+        "/api/portfolio/trades", "GET",
+        lambda q: JsonResponse({"trades": portfolio_api.get_trade_history()}),
+        "交易记录API"
+    )
+    
+    router.register(
+        "/api/portfolio/accuracy", "GET",
+        lambda q: JsonResponse(portfolio_api.get_ai_accuracy()),
+        "AI准确度API"
     )
     
     # === Bot Webhook 路由 ===

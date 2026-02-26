@@ -1,11 +1,11 @@
 {
   "snapshots": {
-    "2026-02-03": {
-      "date": "2026-02-03",
-      "total_assets": 8637.27,
-      "available_cash": 49.57,
-      "total_market_value": 8587.7,
-      "total_profit_loss": -418.7000000000007,
+    "2026-02-09": {
+      "date": "2026-02-09",
+      "total_assets": 8912.69,
+      "available_cash": 4860.39,
+      "total_market_value": 4052.3,
+      "total_profit_loss": -191.59999999999945,
       "daily_profit_loss": 0.0,
       "daily_return_pct": 0.0,
       "total_return_pct": 0.0,
@@ -14,25 +14,154 @@
         "515080": {
           "code": "515080",
           "name": "招商中证红利ETF",
-          "shares": 3700,
-          "cost_price": 1.612,
-          "current_price": 1.556,
+          "shares": 1900,
+          "cost_price": 1.651,
+          "current_price": 1.607,
           "buy_date": "2026-02-01",
-          "last_update": "2026-02-03 00:23:00",
+          "last_update": "2026-02-09 14:47:55",
           "notes": ""
         },
         "159707": {
           "code": "159707",
           "name": "地产ETF",
-          "shares": 4500,
-          "cost_price": 0.676,
-          "current_price": 0.629,
+          "shares": 1500,
+          "cost_price": 0.738,
+          "current_price": 0.666,
           "buy_date": "2026-02-01",
-          "last_update": "2026-02-03 00:23:00",
+          "last_update": "2026-02-09 14:47:55",
+          "notes": ""
+        }
+      }
+    },
+    "2026-02-10": {
+      "date": "2026-02-10",
+      "total_assets": 8362.49,
+      "available_cash": 2829.09,
+      "total_market_value": 5533.4,
+      "total_profit_loss": -726.8000000000002,
+      "daily_profit_loss": -550.2000000000007,
+      "daily_return_pct": -6.173220430644403,
+      "total_return_pct": -6.173220430644403,
+      "position_count": 3,
+      "positions_snapshot": {
+        "515080": {
+          "code": "515080",
+          "name": "招商中证红利ETF",
+          "shares": 2200,
+          "cost_price": 1.6447272727272728,
+          "current_price": 1.607,
+          "buy_date": "2026-02-01",
+          "last_update": "2026-02-10 09:59:03",
+          "notes": ""
+        },
+        "159707": {
+          "code": "159707",
+          "name": "地产ETF",
+          "shares": 3000,
+          "cost_price": 0.6965,
+          "current_price": 0.666,
+          "buy_date": "2026-02-01",
+          "last_update": "2026-02-10 09:59:35",
+          "notes": ""
+        },
+        "159928": {
+          "code": "159928",
+          "name": "消费ETF",
+          "shares": 700,
+          "cost_price": 0.789,
+          "current_price": 0.789,
+          "buy_date": "2026-02-10",
+          "last_update": "2026-02-10 10:41:29",
+          "notes": ""
+        }
+      }
+    },
+    "2026-02-11": {
+      "date": "2026-02-11",
+      "total_assets": 8362.49,
+      "available_cash": 2829.09,
+      "total_market_value": 5533.4,
+      "total_profit_loss": -726.8000000000002,
+      "daily_profit_loss": 0.0,
+      "daily_return_pct": 0.0,
+      "total_return_pct": -6.173220430644403,
+      "position_count": 3,
+      "positions_snapshot": {
+        "515080": {
+          "code": "515080",
+          "name": "招商中证红利ETF",
+          "shares": 2200,
+          "cost_price": 1.6447272727272728,
+          "current_price": 1.607,
+          "buy_date": "2026-02-01",
+          "last_update": "2026-02-10 09:59:03",
+          "notes": ""
+        },
+        "159707": {
+          "code": "159707",
+          "name": "地产ETF",
+          "shares": 3000,
+          "cost_price": 0.6965,
+          "current_price": 0.666,
+          "buy_date": "2026-02-01",
+          "last_update": "2026-02-10 09:59:35",
+          "notes": ""
+        },
+        "159928": {
+          "code": "159928",
+          "name": "消费ETF",
+          "shares": 700,
+          "cost_price": 0.789,
+          "current_price": 0.789,
+          "buy_date": "2026-02-10",
+          "last_update": "2026-02-10 10:41:29",
+          "notes": ""
+        }
+      }
+    },
+    "2026-02-12": {
+      "date": "2026-02-12",
+      "total_assets": 8362.49,
+      "available_cash": 2829.09,
+      "total_market_value": 5533.4,
+      "total_profit_loss": -726.8000000000002,
+      "daily_profit_loss": 0.0,
+      "daily_return_pct": 0.0,
+      "total_return_pct": -6.173220430644403,
+      "position_count": 3,
+      "positions_snapshot": {
+        "515080": {
+          "code": "515080",
+          "name": "招商中证红利ETF",
+          "shares": 2200,
+          "cost_price": 1.6447272727272728,
+          "current_price": 1.607,
+          "buy_date": "2026-02-01",
+          "last_update": "2026-02-10 09:59:03",
+          "notes": ""
+        },
+        "159707": {
+          "code": "159707",
+          "name": "地产ETF",
+          "shares": 3000,
+          "cost_price": 0.6965,
+          "current_price": 0.666,
+          "buy_date": "2026-02-01",
+          "last_update": "2026-02-10 09:59:35",
+          "notes": ""
+        },
+        "159928": {
+          "code": "159928",
+          "name": "消费ETF",
+          "shares": 700,
+          "cost_price": 0.789,
+          "current_price": 0.0,
+          "buy_date": "2026-02-10",
+          "last_update": "2026-02-10 10:41:29",
           "notes": ""
         }
       }
     }
   },
-  "updated_at": "2026-02-03 10:54:57"
+  "updated_at": "2026-02-12 06:58:31"
 }

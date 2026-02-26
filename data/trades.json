@@ -1,0 +1,53 @@
+{
+  "trades": [
+    {
+      "trade_id": "20260210095903_515080",
+      "date": "2026-02-10",
+      "time": "09:59:03",
+      "code": "515080",
+      "name": "红利ETF",
+      "action": "buy",
+      "shares": 300,
+      "price": 1.605,
+      "amount": 481.5,
+      "commission": 5.0,
+      "stamp_duty": 0,
+      "total_cost": 486.5,
+      "reason": "现价加仓",
+      "notes": ""
+    },
+    {
+      "trade_id": "20260210095935_159707",
+      "date": "2026-02-10",
+      "time": "09:59:35",
+      "code": "159707",
+      "name": "地产ETF",
+      "action": "buy",
+      "shares": 1500,
+      "price": 0.655,
+      "amount": 982.5,
+      "commission": 5.0,
+      "stamp_duty": 0,
+      "total_cost": 987.5,
+      "reason": "MA10加仓",
+      "notes": ""
+    },
+    {
+      "trade_id": "20260210104129_159928",
+      "date": "2026-02-10",
+      "time": "10:41:29",
+      "code": "159928",
+      "name": "消费ETF",
+      "action": "buy",
+      "shares": 700,
+      "price": 0.789,
+      "amount": 552.3000000000001,
+      "commission": 5.0,
+      "stamp_duty": 0,
+      "total_cost": 557.3000000000001,
+      "reason": "MA10建仓",
+      "notes": ""
+    }
+  ],
+  "updated_at": "2026-02-10 10:41:29"
+}
